@@ -37,7 +37,7 @@ Simply to building your WPF look like UWP apps. (even on Windows 7 or Vista)
 ### Blur Effect Level 模糊特性等级
 
 | 系统                      | 特效                           |
-| :-----------------------: |:-----------------------------:|
+| :------------------------ |:------------------------------|
 | Windows 10 1803~1809+     | 亚克力模糊 (Acrylic Blur)      |
 | Windows 10 1507~1709      | Windows 10 模糊 (Acrylic Blur) |
 | Windows 8~8.1             | 半透明 (Translucent)           |
