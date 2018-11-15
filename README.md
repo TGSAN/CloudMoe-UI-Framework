@@ -4,6 +4,8 @@ Simply to building your WPF look like UWP apps. (even on Windows 7 or Vista)
 
 ![UI界面截图][UI_image]
 
+![亚克力与普通模糊对比][AcrylicDemo_image]
+
 # Features 功能
 
 ### General 一般
@@ -58,3 +60,4 @@ murrple-1/APNGManagement
 riverar/sample-win32-acrylicblur
 
 [UI_image]:./Pages/images/Screen.png
+[AcrylicDemo_image]:./Pages/images/AcrylicDemo.png
