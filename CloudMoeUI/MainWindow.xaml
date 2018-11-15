@@ -1,0 +1,67 @@
+﻿<!--BorderBrush="{DynamicResource AccentColorBrush}"-->
+<Controls:MetroWindow
+    x:Class="CloudMoeUI.MainWindow"
+    xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+    xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviours="http://metro.mahapps.com/winfx/xaml/shared"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+    xmlns:local="clr-namespace:CloudMoeUI"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="CloudMoeUIFramework"
+    local:EnableDragHelper.EnableDrag="False"
+    ShowTitleBar="False"
+    Background="Transparent"
+    AllowsTransparency="True"
+    BorderThickness="1"
+    BorderBrush="#33808080"
+    NonActiveBorderBrush="#80808080"
+    ShowMaxRestoreButton="True"
+    WindowTransitionsEnabled="True"
+    WindowTransitionCompleted="MetroWindow_WindowTransitionCompleted"
+    Topmost="True"
+    MinHeight="240"
+    MinWidth="170"
+    Height="480"
+    Width="320"
+    mc:Ignorable="d">
+    <!--MaxWidth="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Width}"
+    MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"-->
+    <Controls:MetroWindow.WindowButtonCommands>
+        <Controls:WindowButtonCommands x:Name="WinBtnCmd" Margin="0,0,0,0" Style="{DynamicResource MahApps.Metro.Styles.WindowButtonCommands.Win10}" />
+    </Controls:MetroWindow.WindowButtonCommands>
+    <WindowChrome.WindowChrome>
+        <WindowChrome
+            x:Name="WinChr"
+            CaptionHeight="0"
+            GlassFrameThickness="1"
+        />
+    </WindowChrome.WindowChrome>
+    <Grid 
+        x:Name="MainGrid"
+        Background="Transparent"
+        Margin="0,0,0,0"
+    >
+        <Rectangle
+            x:Name="BlurRectangle"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            Fill="#001F1F1F"
+            Opacity="1">
+            <Rectangle.Effect>
+                <local:NoiseEffect Ratio="0.125" />
+            </Rectangle.Effect>
+        </Rectangle>
+        <Grid
+            x:Name="TitleBarColor"
+            Background="#55000000"
+            Height="30" 
+            VerticalAlignment="Top"
+        />
+        <mah:TransitioningContentControl x:Name="PageTransitioning" Transition="Default">
+        </mah:TransitioningContentControl>
+    </Grid>
+</Controls:MetroWindow>
