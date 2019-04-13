@@ -1,23 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Shell;
+using MessageBox = System.Windows.MessageBox;
 
 namespace CloudMoeUI
 {
@@ -29,6 +18,8 @@ namespace CloudMoeUI
 
         #region CloudMoeUI Configure UI配置
 
+        System.Windows.Media.Color Win8ColorOpacity = System.Windows.Media.Color.FromArgb(240, 31, 31, 31); // Win8颜色（轻微透明）
+        double NoiseEffectRatio = 0.125; // 材质强度
         System.Windows.Media.Color BlurColorOpacity = System.Windows.Media.Color.FromArgb(128, 12, 12, 12); // 模糊颜色（透明） // double BlurOpacity = 0.6; // 模糊透明度
         System.Windows.Media.Color BlurColorNonOpacity = System.Windows.Media.Color.FromArgb(255, 31, 31, 31); // 模糊颜色（不透明）
         System.Windows.Media.Color TransparentColor = System.Windows.Media.Color.FromArgb(0, 0, 0, 0); // 全透明
@@ -39,7 +30,17 @@ namespace CloudMoeUI
 
         #endregion
 
-        #region CloudMoeUI Core Code (Version 1811.14008)
+        #region CloudMoeUI Core Code (Version 1904.14008)
+
+        #region 动画属性声明（请在非启动窗体移除此代码块）
+
+        public readonly DependencyProperty WindowHeightAnimationProperty = DependencyProperty.Register("WindowHeightAnimation", typeof(double),
+                                                                                                    typeof(MainWindow), new PropertyMetadata(OnWindowHeightAnimationChanged));
+
+        public readonly DependencyProperty WindowWidthAnimationProperty = DependencyProperty.Register("WindowWidthAnimation", typeof(double),
+                                                                                                    typeof(MainWindow), new PropertyMetadata(OnWindowWidthAnimationChanged));
+
+        #endregion
 
         #region 使用Win32API主进程更改窗口大小动画
 
@@ -66,9 +67,6 @@ namespace CloudMoeUI
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-
-        public readonly DependencyProperty WindowHeightAnimationProperty = DependencyProperty.Register("WindowHeightAnimation", typeof(double),
-                                                                                                    typeof(MainWindow), new PropertyMetadata(OnWindowHeightAnimationChanged));
 
         private static void OnWindowHeightAnimationChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -103,9 +101,6 @@ namespace CloudMoeUI
             get { return (double)GetValue(WindowHeightAnimationProperty); }
             set { SetValue(WindowHeightAnimationProperty, value); }
         }
-
-        public readonly DependencyProperty WindowWidthAnimationProperty = DependencyProperty.Register("WindowWidthAnimation", typeof(double),
-                                                                                                    typeof(MainWindow), new PropertyMetadata(OnWindowWidthAnimationChanged));
 
         private static void OnWindowWidthAnimationChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -182,17 +177,48 @@ namespace CloudMoeUI
 
         #endregion
 
+        #region CMUIConfig 类
+
+        /// <summary>
+        /// CMUIConfig 类，包含可对 CloudMoeUI 进行更改的属性和方法
+        /// </summary>
+        public partial class CMUIConfig
+        {
+            /// <summary>
+            /// CMUIConfig.Window 类，包含可对 CloudMoeUI 窗口相关进行更改的属性和方法
+            /// </summary>
+            public partial class Window
+            {
+                //public bool sizeable_bool = true;
+                //public bool Sizeable
+                //{
+                //    get { return this.sizeable_bool; }
+                //    set
+                //    {
+                //        if (value != this.sizeable_bool)
+                //        {
+                //            //WhenValueChange();
+                //        }
+                //        this.sizeable_bool = value;
+                //    }
+                //}
+            }
+        }
+
+        #endregion
+
         /// <summary>
         /// 模糊切换器（调用模糊类，主要为了给窗口透明度进行调整，否则不好看）
         /// </summary>
-        /// <param name="window">需要应用效果的窗口</param>
+        /// <param name="visual">需要应用效果的窗口</param>
         /// <param name="switcher">true为开启模，false为关闭</param>
-        private void BlurSwitcher(Window window, bool switcher)
+        private void BlurSwitcher(Visual visual, bool switcher)
         {
             if (switcher == true)
             {
                 //BlurEffectV2.SetIsEnabled(this, true);
-                BlurEffect.GeneralBlurSwitcher(window, true);
+                BlurEffect.GeneralBlurSwitcher(this, true);
+                //BlurEffect.GeneralBlurSwitcher(window, true);
                 //BlurRectangle.Opacity = BlurOpacity;
                 //BlurRectangle.Fill = new SolidColorBrush(BlurColorOpacity);
                 BGOpacityAnimation(true, BlurAnimationTime);
@@ -207,7 +233,7 @@ namespace CloudMoeUI
                 {
                     BlurRectangle.Fill = new SolidColorBrush(BlurColorNonOpacity); // 最大化直接不透明，不使用动画
                     //Thread.Sleep(1000);
-                    BlurEffect.GeneralBlurSwitcher(window, false);
+                    BlurEffect.GeneralBlurSwitcher(this, false);
                 }
                 else
                 {
@@ -231,18 +257,39 @@ namespace CloudMoeUI
             Storyboard.SetTargetProperty(storyboard, new PropertyPath("Fill.Color"));
             ColorAnimation colorAnm = new ColorAnimation();
 
+            System.Windows.Media.Color OS_BlurColorOpacity = BlurColorOpacity; // 根据系统设置正确的透明度（主要是不支持透明的Win8系列）
+
+            if (Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor > 1) // 是否为Win8或者Win8.1（Win8:6.2,Win8.1:6.3）
+            {
+                OS_BlurColorOpacity = Win8ColorOpacity; // 设置透明度
+                NoiseEffectObject.Ratio = 0; // 关闭材质
+            }
+            else
+            {
+                // NoiseEffectObject.Ratio = NoiseEffectRatio; // 设置材质强度
+
+                if (Environment.OSVersion.Version.Build >= 17134) // 只在1803及以上系统采用亚克力材质
+                {
+                    NoiseEffectObject.Ratio = NoiseEffectRatio; // 设置材质强度
+                }
+                else
+                {
+                    NoiseEffectObject.Ratio = 0; // 关闭材质
+                }
+            }
+
             if (IsOpacity == true)
             {
                 colorAnm.Duration = new Duration(TimeSpan.FromMilliseconds(time));
                 colorAnm.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
                 colorAnm.From = BlurColorNonOpacity;
-                colorAnm.To = BlurColorOpacity;
+                colorAnm.To = OS_BlurColorOpacity;
             }
             else
             {
                 colorAnm.Duration = new Duration(TimeSpan.FromMilliseconds(time));
                 colorAnm.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
-                colorAnm.From = BlurColorOpacity;
+                colorAnm.From = OS_BlurColorOpacity;
                 colorAnm.To = BlurColorNonOpacity;
             }
             storyboard.Children.Add(colorAnm);
@@ -255,7 +302,7 @@ namespace CloudMoeUI
         /// <param name="width">应用到的宽（为-1则保持不变，请勿使用ActualWidth）</param>
         /// <param name="height">应用到的高（为-1则保持不变，请勿使用ActualHeight）</param>
         /// <param name="time">动画持续时间，单位ms，默认250ms</param>
-        public void SizeAnimation(int width, int height,int time = 250)
+        public void SizeAnimation(int width, int height, int time = 250)
         {
             if (WindowState == WindowState.Maximized)
             {
@@ -445,7 +492,9 @@ namespace CloudMoeUI
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             PageChangeToHomePage();
-            
+            //Console.WriteLine("Windows Handle: " + ((HwndSource)PresentationSource.FromVisual(this)).Handle.ToString());
+            MessageBox.Show("Version: " + Environment.OSVersion.Version);
+
             //MessageBox.Show(Environment.OSVersion.Version.Major.ToString());
         }
 

@@ -11,6 +11,8 @@
     xmlns:local="clr-namespace:CloudMoeUI"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:winFormsIntegration="clr-namespace:System.Windows.Forms.Integration;assembly=WindowsFormsIntegration"
+    xmlns:winForms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
     Title="CloudMoeUIFramework"
     local:EnableDragHelper.EnableDrag="False"
     ShowTitleBar="False"
@@ -19,7 +21,6 @@
     BorderThickness="1"
     BorderBrush="#33808080"
     NonActiveBorderBrush="#80808080"
-    ShowMaxRestoreButton="True"
     WindowTransitionsEnabled="True"
     WindowTransitionCompleted="MetroWindow_WindowTransitionCompleted"
     Topmost="True"
@@ -27,7 +28,11 @@
     MinWidth="170"
     Height="480"
     Width="320"
-    mc:Ignorable="d">
+    ResizeMode="CanResize"
+    IsWindowDraggable="True"
+    ShowMaxRestoreButton="True"
+    mc:Ignorable="d"
+    Opacity="1">
     <!--MaxWidth="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Width}"
     MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"-->
     <Controls:MetroWindow.WindowButtonCommands>
@@ -45,6 +50,10 @@
         Background="Transparent"
         Margin="0,0,0,0"
     >
+        <!--<winFormsIntegration:WindowsFormsHost
+            x:Name="wfh">
+            
+        </winFormsIntegration:WindowsFormsHost>-->
         <Rectangle
             x:Name="BlurRectangle"
             HorizontalAlignment="Stretch"
@@ -52,7 +61,7 @@
             Fill="#001F1F1F"
             Opacity="1">
             <Rectangle.Effect>
-                <local:NoiseEffect Ratio="0.125" />
+                <local:NoiseEffect x:Name="NoiseEffectObject" Ratio="0.125" />
             </Rectangle.Effect>
         </Rectangle>
         <Grid
