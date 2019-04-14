@@ -17,7 +17,7 @@
                 Background="Transparent"
                 Height="30"
             >
-                <TextBlock x:Name="TitleBar" Foreground="WhiteSmoke" Text="设置" TextTrimming="CharacterEllipsis" Margin="12,0,138,0" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                <TextBlock x:Name="TitleBar" Foreground="{DynamicResource BlackColorBrush}" Text="设置" TextTrimming="CharacterEllipsis" Margin="12,0,138,0" HorizontalAlignment="Left" VerticalAlignment="Center" />
                 <Label x:Name="TitleBarBG" Margin="0" MouseDoubleClick="TitleBarBG_MouseDoubleClick" MouseDown="TitleBarBG_MouseDown"/>
             </Grid>
             <Grid Margin="14">
@@ -29,14 +29,28 @@
                         IsEnabled="True"
                         OffLabel=""
                         OnLabel=""
-                        Style="{StaticResource MahApps.Metro.Styles.ToggleSwitch.Win10}"
+                        Style="{DynamicResource MahApps.Metro.Styles.ToggleSwitch.Win10}"
                     />
                     <Button 
                         Margin="0,10"
-                        Width="100"
+                        Width="200"
+                        Height="32"
                         HorizontalAlignment="Left"
-                        Content="Enabled"
-                        Style="{DynamicResource SquareButtonStyle}"
+                        Content="Flat Demo Button"
+                        Style="{DynamicResource MetroFlatButton}"
+                    />
+                    <Controls:Tile
+                        Margin="0,10"
+                        Width="200"
+                        Height="32"
+                        HorizontalAlignment="Left"
+                        Title="Size Change"
+                        TitleFontSize="12"
+                        HorizontalTitleAlignment="Center"
+                        VerticalTitleAlignment="Center"
+                        Background="{DynamicResource MahApps.Metro.Brushes.ToggleSwitchButton.OnSwitchDisabledBrush.Win10}"
+                        Foreground="{DynamicResource LabelTextBrush}"
+                        Controls:ControlsHelper.MouseOverBorderBrush="{DynamicResource BlackBrush}"
                         Click="Button_Click"
                     />
                 </StackPanel>

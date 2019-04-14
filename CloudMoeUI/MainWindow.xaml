@@ -19,8 +19,7 @@
     Background="Transparent"
     AllowsTransparency="True"
     BorderThickness="1"
-    BorderBrush="#33808080"
-    NonActiveBorderBrush="#80808080"
+    ResizeBorderThickness="10"
     WindowTransitionsEnabled="True"
     WindowTransitionCompleted="MetroWindow_WindowTransitionCompleted"
     Topmost="True"
@@ -28,8 +27,13 @@
     MinWidth="170"
     Height="480"
     Width="320"
+    GlowBrush="#40000000"
+    NonActiveGlowBrush="#20000000"
+    BorderBrush="#80000000"
+    NonActiveBorderBrush="#33000000"
     ResizeMode="CanResize"
     IsWindowDraggable="True"
+    ShowMinButton="True"
     ShowMaxRestoreButton="True"
     mc:Ignorable="d"
     Opacity="1">
@@ -66,7 +70,7 @@
         </Rectangle>
         <Grid
             x:Name="TitleBarColor"
-            Background="#55000000"
+            Background="#40000000"
             Height="30" 
             VerticalAlignment="Top"
         />

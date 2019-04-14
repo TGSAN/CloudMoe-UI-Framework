@@ -26,6 +26,10 @@ Simply to building your WPF look like UWP apps. (even on Windows 7 or Vista)
 
 - [x] MahApps兼容
 
+- [x] 支持主动跟随系统默认应用主题色（Windows 10 Light Theme or Dark Theme）
+
+- [x] 主动避让 Windows Vista or Windows 7 禁用 DWM 的 Failback
+
 - [x] Fluent Design System 材质 (Material)
 
 - [ ] Fluent Design System 光感 (Light)

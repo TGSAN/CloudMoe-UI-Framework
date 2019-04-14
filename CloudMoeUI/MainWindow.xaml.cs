@@ -1,12 +1,28 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using System.Windows.Shell;
+using System.Windows.Forms;
 using MessageBox = System.Windows.MessageBox;
+using Microsoft.Win32;
+using Application = System.Windows.Application;
+using MahApps.Metro;
 
 namespace CloudMoeUI
 {
@@ -18,11 +34,33 @@ namespace CloudMoeUI
 
         #region CloudMoeUI Configure UI配置
 
-        System.Windows.Media.Color Win8ColorOpacity = System.Windows.Media.Color.FromArgb(240, 31, 31, 31); // Win8颜色（轻微透明）
-        double NoiseEffectRatio = 0.125; // 材质强度
-        System.Windows.Media.Color BlurColorOpacity = System.Windows.Media.Color.FromArgb(128, 12, 12, 12); // 模糊颜色（透明） // double BlurOpacity = 0.6; // 模糊透明度
-        System.Windows.Media.Color BlurColorNonOpacity = System.Windows.Media.Color.FromArgb(255, 31, 31, 31); // 模糊颜色（不透明）
+        #region 预设颜色（暗色）
+
+        System.Windows.Media.Color DarkTitleBarColorOpacity = System.Windows.Media.Color.FromArgb(64, 0, 0, 0); // 标题栏颜色
+        System.Windows.Media.Color DarkWin8ColorOpacity = System.Windows.Media.Color.FromArgb(240, 31, 31, 31); // Win8颜色（轻微透明）
+        System.Windows.Media.Color DarkBlurColorOpacity = System.Windows.Media.Color.FromArgb(128, 12, 12, 12); // 模糊颜色（透明） // double BlurOpacity = 0.6; // 模糊透明度
+        System.Windows.Media.Color DarkBlurColorNonOpacity = System.Windows.Media.Color.FromArgb(255, 31, 31, 31); // 模糊颜色（不透明）
+        double DarkNoiseEffectRatio = 0.05; // 材质强度
+
+        #endregion
+
+        #region 颜色方案1（亮色）
+
+        System.Windows.Media.Color LightTitleBarColorOpacity = System.Windows.Media.Color.FromArgb(64, 255, 255, 255); // 标题栏颜色
+        System.Windows.Media.Color LightWin8ColorOpacity = System.Windows.Media.Color.FromArgb(240, 230, 230, 230); // Win8颜色（轻微透明）
+        System.Windows.Media.Color LightBlurColorOpacity = System.Windows.Media.Color.FromArgb(128, 255, 255, 255); // 模糊颜色（透明）
+        System.Windows.Media.Color LightBlurColorNonOpacity = System.Windows.Media.Color.FromArgb(255, 230, 230, 230); // 模糊颜色（不透明）
+        double LightNoiseEffectRatio = 0.05; // 材质强度
+
+        #endregion
+
+        System.Windows.Media.Color TitleBarColorOpacity; // 标题栏颜色
+        System.Windows.Media.Color Win8ColorOpacity; // Win8颜色（轻微透明）
+        System.Windows.Media.Color BlurColorOpacity; // 模糊颜色（透明）
+        System.Windows.Media.Color BlurColorNonOpacity; // 模糊颜色（不透明）
         System.Windows.Media.Color TransparentColor = System.Windows.Media.Color.FromArgb(0, 0, 0, 0); // 全透明
+
+        double NoiseEffectRatio; // 材质强度
 
         int BlurAnimationTime = 250; // 模糊切换动画事件（ms）
 
@@ -30,7 +68,7 @@ namespace CloudMoeUI
 
         #endregion
 
-        #region CloudMoeUI Core Code (Version 1904.14008)
+        #region CloudMoeUI Core Code (Version 1904.15028)
 
         #region 动画属性声明（请在非启动窗体移除此代码块）
 
@@ -208,6 +246,87 @@ namespace CloudMoeUI
         #endregion
 
         /// <summary>
+        /// 获取 Windows10 透明效果设置（是否开启模糊效果，Win10 10240 开始支持）
+        /// </summary>
+        public string GetWindows10TransparencySetting()
+        {
+            string registData = "1"; // 默认1使用透明效果
+            try
+            {
+                RegistryKey reg_HKCU = Registry.CurrentUser;
+                RegistryKey reg_ThemesPersonalize = reg_HKCU.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", false); // false为只读，true为可写入
+                if (reg_ThemesPersonalize.GetValue("EnableTransparency") != null)  //如果值不为空
+                {
+                    registData = reg_ThemesPersonalize.GetValue("EnableTransparency").ToString(); // 读取值
+                    Console.WriteLine(registData);
+                }
+                else
+                {
+                    throw new Exception("找不到 EnableTransparency 值");
+                }
+            }
+            catch
+            {
+                Console.WriteLine("获取透明效果设置失败，返回默认值1（使用透明效果）");
+            }
+            return registData;
+        }
+
+        /// <summary>
+        /// 获取 Windows10 默认应用模式（App的主题色，1803内部版本17134开始支持）
+        /// </summary>
+        public string GetWindows10AppsLightThemeSetting()
+        {
+            string registData = "1"; // 默认1亮色模式
+            try
+            {
+                RegistryKey reg_HKCU = Registry.CurrentUser;
+                RegistryKey reg_ThemesPersonalize = reg_HKCU.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", false); // false为只读，true为可写入
+                if (reg_ThemesPersonalize.GetValue("AppsUseLightTheme") != null)  //如果值不为空（注意AppsUseLightTheme用的是Use而不是Uses）
+                {
+                    registData = reg_ThemesPersonalize.GetValue("AppsUseLightTheme").ToString(); // 读取值
+                    Console.WriteLine(registData);
+                }
+                else
+                {
+                    throw new Exception("找不到 AppsUseLightTheme 值");
+                }
+            }
+            catch
+            {
+                Console.WriteLine("获取默认应用模式失败，返回默认值1（亮色模式）");
+            }
+            return registData;
+        }
+
+        /// <summary>
+        /// 获取 Windows10 默认系统模式（系统的主题色主要为任务栏颜色，1903内部版本17763开始支持）
+        /// </summary>
+        public string GetWindows10SystemLightThemeSetting()
+        {
+            string registData = "0"; // 默认0暗色模式
+            try
+            {
+                RegistryKey reg_HKCU = Registry.CurrentUser;
+                RegistryKey reg_ThemesPersonalize = reg_HKCU.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", false); // false为只读，true为可写入
+                if (reg_ThemesPersonalize.GetValue("SystemUsesLightTheme") != null)  //如果值不为空（注意SystemUsesLightTheme用的是Uses而不是Use）
+                {
+                    registData = reg_ThemesPersonalize.GetValue("SystemUsesLightTheme").ToString(); // 读取值
+                    Console.WriteLine(registData);
+                }
+                else
+                {
+                    throw new Exception("找不到 SystemUsesLightTheme 值");
+                }
+            }
+            catch
+            {
+                Console.WriteLine("获取默认系统模式失败，返回默认值0（暗色模式）");
+            }
+            return registData;
+        }
+
+        /// <summary>
         /// 模糊切换器（调用模糊类，主要为了给窗口透明度进行调整，否则不好看）
         /// </summary>
         /// <param name="visual">需要应用效果的窗口</param>
@@ -217,11 +336,39 @@ namespace CloudMoeUI
             if (switcher == true)
             {
                 //BlurEffectV2.SetIsEnabled(this, true);
-                BlurEffect.GeneralBlurSwitcher(this, true);
-                //BlurEffect.GeneralBlurSwitcher(window, true);
-                //BlurRectangle.Opacity = BlurOpacity;
-                //BlurRectangle.Fill = new SolidColorBrush(BlurColorOpacity);
-                BGOpacityAnimation(true, BlurAnimationTime);
+                if (GetWindows10TransparencySetting() == "1") // 如果Win10设置开启模糊则开启模糊
+                {
+                    BlurEffect.GeneralBlurSwitcher(this, true);
+                    //BlurEffect.GeneralBlurSwitcher(window, true);
+                    //BlurRectangle.Opacity = BlurOpacity;
+                    //BlurRectangle.Fill = new SolidColorBrush(BlurColorOpacity);
+                    BGOpacityAnimation(true, BlurAnimationTime);
+                }
+                else
+                {
+                    BlurRectangle.Fill = new SolidColorBrush(BlurColorNonOpacity); // 禁用模糊直接不透明，不使用动画
+                }
+                // 模糊时选择性使用材质
+                if (Environment.OSVersion.Version.Major > 6) // 是否为Win10
+                {
+                    //NoiseEffectObject.Ratio = NoiseEffectRatio; // 设置材质强度
+                    if (Environment.OSVersion.Version.Build >= 17134) // 只在1803及以上系统采用亚克力材质
+                    {
+                        if (GetWindows10TransparencySetting() == "1") // 如果Win10设置开启模糊则使用亚克力材质
+                        {
+                            NoiseEffectObject.Ratio = NoiseEffectRatio; // 设置材质强度
+                        }
+                        else
+                        {
+                            NoiseEffectObject.Ratio = 0; // 关闭材质
+                        }
+                    }
+                    else
+                    {
+                        //NoiseEffectObject.Ratio = 0; // 关闭材质
+                        NoiseEffectObject.Ratio = NoiseEffectRatio / 2; // 设置材质强度（更弱的）
+                    }
+                }
                 LastBlurBool = true;
             }
             else
@@ -237,11 +384,23 @@ namespace CloudMoeUI
                 }
                 else
                 {
-                    BGOpacityAnimation(false, BlurAnimationTime); // 普通情况下使用动画
+                    if (GetWindows10TransparencySetting() == "0") // 如果Win10设置关闭模糊则彻底关闭模糊
+                    {
+                        BlurRectangle.Fill = new SolidColorBrush(BlurColorNonOpacity); // 禁用模糊直接不透明，不使用动画
+                        BlurEffect.GeneralBlurSwitcher(this, false);
+                    }
+                    else
+                    {
+                        BGOpacityAnimation(false, BlurAnimationTime); // 普通情况下使用动画
+                    }
                 }
+                NoiseEffectObject.Ratio = 0; // 关闭模糊时关闭材质
                 LastBlurBool = false;
             }
         }
+
+        [DllImport("dwmapi.dll", PreserveSig = false)]
+        public static extern bool DwmIsCompositionEnabled();
 
         /// <summary>
         /// 透明转换动画（是否变为透明）
@@ -250,6 +409,7 @@ namespace CloudMoeUI
         /// <param name="time">动画持续时间，单位ms，默认250ms</param>
         private void BGOpacityAnimation(bool IsOpacity, int time = 250)
         {
+            AutoSyncThemeSetting(); // 应用Win10全局主题设置
             var storyboard = new Storyboard();
             //Timeline.SetDesiredFrameRate(storyboard, 60);
             Storyboard.SetDesiredFrameRate(storyboard, AnimationFrameRate);
@@ -259,23 +419,10 @@ namespace CloudMoeUI
 
             System.Windows.Media.Color OS_BlurColorOpacity = BlurColorOpacity; // 根据系统设置正确的透明度（主要是不支持透明的Win8系列）
 
-            if (Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor > 1) // 是否为Win8或者Win8.1（Win8:6.2,Win8.1:6.3）
+            if ((Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor > 1) || (Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor <= 1 && DwmIsCompositionEnabled() == false)) // 是否为Win8或者Win8.1（Win8:6.2,Win8.1:6.3），或者Vista或Win7未开启DWM
             {
                 OS_BlurColorOpacity = Win8ColorOpacity; // 设置透明度
                 NoiseEffectObject.Ratio = 0; // 关闭材质
-            }
-            else
-            {
-                // NoiseEffectObject.Ratio = NoiseEffectRatio; // 设置材质强度
-
-                if (Environment.OSVersion.Version.Build >= 17134) // 只在1803及以上系统采用亚克力材质
-                {
-                    NoiseEffectObject.Ratio = NoiseEffectRatio; // 设置材质强度
-                }
-                else
-                {
-                    NoiseEffectObject.Ratio = 0; // 关闭材质
-                }
             }
 
             if (IsOpacity == true)
@@ -452,15 +599,122 @@ namespace CloudMoeUI
         /// </summary>
         public void MaximiseSwitcher()
         {
-            if (WindowState == WindowState.Maximized)
+
+            if (this.ResizeMode == ResizeMode.CanResize || this.ResizeMode == ResizeMode.CanResizeWithGrip) // 只有 CanResize 和 CanResizeWithGrip 可以切换
             {
-                WindowState = WindowState.Normal;
-            }
-            else
-            {
-                WindowState = WindowState.Maximized;
+                if (WindowState == WindowState.Maximized)
+                {
+                    WindowState = WindowState.Normal;
+                }
+                else
+                {
+
+                    WindowState = WindowState.Maximized;
+                }
             }
         }
+
+        /// <summary>
+        /// 自动应用Win10全局主题设置（true 为应用成功）
+        /// </summary>
+        public bool AutoSyncThemeSetting()
+        {
+            try
+            {
+                Accent expectedAccent;
+                AppTheme expectedTheme;
+
+                if (GetWindows10AppsLightThemeSetting() == "1") // 是否使用亮色主题（Win10）
+                {
+                    TitleBarColorOpacity = LightTitleBarColorOpacity; // 标题栏颜色
+                    Win8ColorOpacity = LightWin8ColorOpacity; // Win8颜色（轻微透明）
+                    BlurColorOpacity = LightBlurColorOpacity; // 模糊颜色（透明）
+                    BlurColorNonOpacity = LightBlurColorNonOpacity; // 模糊颜色（不透明）
+                    NoiseEffectRatio = LightNoiseEffectRatio; // 材质强度
+                    expectedAccent = ThemeManager.Accents.First(x => x.Name == "Blue");
+                    expectedTheme = ThemeManager.GetAppTheme("BaseLight");
+                }
+                else
+                {
+                    TitleBarColorOpacity = DarkTitleBarColorOpacity; // 标题栏颜色
+                    Win8ColorOpacity = DarkWin8ColorOpacity; // Win8颜色（轻微透明）
+                    BlurColorOpacity = DarkBlurColorOpacity; // 模糊颜色（透明）
+                    BlurColorNonOpacity = DarkBlurColorNonOpacity; // 模糊颜色（不透明）
+                    NoiseEffectRatio = DarkNoiseEffectRatio; // 材质强度
+                    expectedAccent = ThemeManager.Accents.First(x => x.Name == "Blue");
+                    expectedTheme = ThemeManager.GetAppTheme("BaseDark");
+                }
+                TitleBarColor.Background = new SolidColorBrush(TitleBarColorOpacity); // 设置标题栏颜色
+
+                ThemeManager.ChangeAppStyle(Application.Current, expectedAccent, expectedTheme);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 初始化 CloudMoe UI 框架（true 为初始化成功）
+        /// </summary>
+        public bool InitializeCloudMoeUI()
+        {
+            try
+            {
+                AutoSyncThemeSetting(); // 应用Win10全局主题设置
+                AllowsTransparency = true; // 设置允许透明（必须在代码初始化后立即声明，否则有问题）
+                Background = new SolidColorBrush(BlurColorNonOpacity); // 启动时整体背景不透明
+                Loaded += MainWindow_Loaded;
+                SizeChanged += MainWindow_SizeChanged;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        #region 截获消息
+
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            HwndSource source = PresentationSource.FromVisual(this) as HwndSource;
+            source.AddHook(WndProc);
+        }
+
+        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            // Handle messages...
+            const int WM_WININICHANGE = 0x001A;
+            const int WM_SETTINGCHANGE = WM_WININICHANGE;
+            // const int WM_SYSCOLORCHANGE = 0x0015;
+            switch (msg)
+            {
+                case WM_SETTINGCHANGE: // 系统设置变更时主动更新配色方案
+                    try
+                    {
+                        if (this.IsActive == true) // 检查是否为焦点，如果是才模糊，此处用于刷新配色
+                        {
+                            BlurSwitcher(this, true);
+                        }
+                        else
+                        {
+                            BlurSwitcher(this, false);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("接受系统消息主动更新配色方案失败。错误：" + e.Message);
+                    }
+                    break;
+            }
+            // return hwnd;
+            return IntPtr.Zero;
+        }
+
+        #endregion
 
         #endregion
 
@@ -483,18 +737,19 @@ namespace CloudMoeUI
         public MainWindow()
         {
             InitializeComponent();
-            AllowsTransparency = true; // 设置允许透明（必须在代码初始化后立即声明，否则有问题）
-            Background = new SolidColorBrush(BlurColorNonOpacity); // 启动时整体背景不透明
-            Loaded += MainWindow_Loaded;
-            SizeChanged += MainWindow_SizeChanged;
+            if (!InitializeCloudMoeUI()) // 初始化框架（必须在代码初始化后立即声明，否则有问题）
+            {
+                MessageBox.Show("初始化失败，请联系开发者。");
+                Application.Current.Shutdown();
+            }
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             PageChangeToHomePage();
             //Console.WriteLine("Windows Handle: " + ((HwndSource)PresentationSource.FromVisual(this)).Handle.ToString());
-            MessageBox.Show("Version: " + Environment.OSVersion.Version);
-
+            //MessageBox.Show("Version: " + Environment.OSVersion.Version);
+            //GetWindows10AppsLightThemeSetting();
             //MessageBox.Show(Environment.OSVersion.Version.Major.ToString());
         }
 
