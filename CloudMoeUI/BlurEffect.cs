@@ -163,9 +163,10 @@ namespace CloudMoeUI
                 Console.WriteLine("Allowed use Acrylic Effect.");
                 //MessageBox.Show("Allowed use Acrylic Effect.");
 
-                int _blurOpacity = 32; /* 0-255 如果为0，颜色不能设置纯黑000000 */
-                int _blurBackgroundColor = 0x000000; /* Drak BGR color format */
-                                                     //int _blurBackgroundColor = 0xE6E6E6; /* Drak BGR color format */
+                int _blurOpacity = 0; /* 0-255 如果为0，颜色不能设置纯黑000000 */
+                // int _blurOpacity = 32; /* 0-255 如果为0，颜色不能设置纯黑000000 */
+                int _blurBackgroundColor = 0xFFFFFF; /* Drak BGR color format */
+                // int _blurBackgroundColor = 0xE6E6E6; /* Drak BGR color format */
 
                 accent.AccentState = AccentState.ACCENT_ENABLE_ACRYLICBLURBEHIND;
 

@@ -68,7 +68,7 @@ namespace CloudMoeUI
 
         #endregion
 
-        #region CloudMoeUI Core Code (Version 1904.15031)
+        #region CloudMoeUI Core Code (Version 1904.15039)
 
         #region 动画属性声明（请在非启动窗体移除此代码块）
 
@@ -258,7 +258,7 @@ namespace CloudMoeUI
                 if (reg_ThemesPersonalize.GetValue("EnableTransparency") != null)  //如果值不为空
                 {
                     registData = reg_ThemesPersonalize.GetValue("EnableTransparency").ToString(); // 读取值
-                    Console.WriteLine(registData);
+                    //Console.WriteLine(registData);
                 }
                 else
                 {
@@ -285,7 +285,7 @@ namespace CloudMoeUI
                 if (reg_ThemesPersonalize.GetValue("AppsUseLightTheme") != null)  //如果值不为空（注意AppsUseLightTheme用的是Use而不是Uses）
                 {
                     registData = reg_ThemesPersonalize.GetValue("AppsUseLightTheme").ToString(); // 读取值
-                    Console.WriteLine(registData);
+                    //Console.WriteLine(registData);
                 }
                 else
                 {
@@ -312,7 +312,7 @@ namespace CloudMoeUI
                 if (reg_ThemesPersonalize.GetValue("SystemUsesLightTheme") != null)  //如果值不为空（注意SystemUsesLightTheme用的是Uses而不是Use）
                 {
                     registData = reg_ThemesPersonalize.GetValue("SystemUsesLightTheme").ToString(); // 读取值
-                    Console.WriteLine(registData);
+                    //Console.WriteLine(registData);
                 }
                 else
                 {
