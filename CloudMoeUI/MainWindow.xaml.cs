@@ -68,7 +68,7 @@ namespace CloudMoeUI
 
         #endregion
 
-        #region CloudMoeUI Core Code (Version 1904.15028)
+        #region CloudMoeUI Core Code (Version 1904.15031)
 
         #region 动画属性声明（请在非启动窗体移除此代码块）
 
@@ -331,18 +331,22 @@ namespace CloudMoeUI
         /// </summary>
         /// <param name="visual">需要应用效果的窗口</param>
         /// <param name="switcher">true为开启模，false为关闭</param>
-        private void BlurSwitcher(Visual visual, bool switcher)
+        public void BlurSwitcher(Visual visual, bool switcher, int animation_time = -1)
         {
+            if (animation_time < 0) // 如果未指定时间，则使用默认值
+            {
+                animation_time = BlurAnimationTime;
+            }
             if (switcher == true)
             {
                 //BlurEffectV2.SetIsEnabled(this, true);
                 if (GetWindows10TransparencySetting() == "1") // 如果Win10设置开启模糊则开启模糊
                 {
-                    BlurEffect.GeneralBlurSwitcher(this, true);
+                    BlurEffect.GeneralBlurSwitcher(visual, true);
                     //BlurEffect.GeneralBlurSwitcher(window, true);
                     //BlurRectangle.Opacity = BlurOpacity;
                     //BlurRectangle.Fill = new SolidColorBrush(BlurColorOpacity);
-                    BGOpacityAnimation(true, BlurAnimationTime);
+                    BGOpacityAnimation(true, animation_time);
                 }
                 else
                 {
@@ -380,18 +384,18 @@ namespace CloudMoeUI
                 {
                     BlurRectangle.Fill = new SolidColorBrush(BlurColorNonOpacity); // 最大化直接不透明，不使用动画
                     //Thread.Sleep(1000);
-                    BlurEffect.GeneralBlurSwitcher(this, false);
+                    BlurEffect.GeneralBlurSwitcher(visual, false);
                 }
                 else
                 {
                     if (GetWindows10TransparencySetting() == "0") // 如果Win10设置关闭模糊则彻底关闭模糊
                     {
                         BlurRectangle.Fill = new SolidColorBrush(BlurColorNonOpacity); // 禁用模糊直接不透明，不使用动画
-                        BlurEffect.GeneralBlurSwitcher(this, false);
+                        BlurEffect.GeneralBlurSwitcher(visual, false);
                     }
                     else
                     {
-                        BGOpacityAnimation(false, BlurAnimationTime); // 普通情况下使用动画
+                        BGOpacityAnimation(false, animation_time); // 普通情况下使用动画
                     }
                 }
                 NoiseEffectObject.Ratio = 0; // 关闭模糊时关闭材质
@@ -697,11 +701,11 @@ namespace CloudMoeUI
                     {
                         if (this.IsActive == true) // 检查是否为焦点，如果是才模糊，此处用于刷新配色
                         {
-                            BlurSwitcher(this, true);
+                            BlurSwitcher(this, true, 0);
                         }
                         else
                         {
-                            BlurSwitcher(this, false);
+                            BlurSwitcher(this, false, 0);
                         }
                     }
                     catch (Exception e)
