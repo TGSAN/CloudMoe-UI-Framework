@@ -19,7 +19,6 @@
     Background="Transparent"
     AllowsTransparency="True"
     BorderThickness="1"
-    ResizeBorderThickness="10"
     WindowTransitionsEnabled="True"
     WindowTransitionCompleted="MetroWindow_WindowTransitionCompleted"
     Topmost="True"
@@ -27,8 +26,6 @@
     MinWidth="170"
     Height="480"
     Width="320"
-    GlowBrush="#40000000"
-    NonActiveGlowBrush="#20000000"
     BorderBrush="#80000000"
     NonActiveBorderBrush="#33000000"
     ResizeMode="CanResize"
@@ -37,9 +34,12 @@
     ShowMaxRestoreButton="True"
     mc:Ignorable="d"
     Opacity="1">
+    <!--GlowBrush="#40000000"
+    NonActiveGlowBrush="#20000000"-->
     <!--MaxWidth="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Width}"
     MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"-->
     <Controls:MetroWindow.WindowButtonCommands>
+        <!--<Controls:WindowButtonCommands x:Name="WinBtnCmd" Margin="0,0,0,0" Template="{DynamicResource MahApps.Metro.Templates.WindowButtonCommands.Win10}" />-->
         <Controls:WindowButtonCommands x:Name="WinBtnCmd" Margin="0,0,0,0" Style="{DynamicResource MahApps.Metro.Styles.WindowButtonCommands.Win10}" />
     </Controls:MetroWindow.WindowButtonCommands>
     <WindowChrome.WindowChrome>
@@ -65,7 +65,7 @@
             Fill="#001F1F1F"
             Opacity="1">
             <Rectangle.Effect>
-                <local:NoiseEffect x:Name="NoiseEffectObject" Ratio="0.125" />
+                <local:NoiseEffect x:Name="NoiseEffectObject" Ratio="0.125" IsLight="True" />
             </Rectangle.Effect>
         </Rectangle>
         <Grid

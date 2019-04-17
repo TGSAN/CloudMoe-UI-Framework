@@ -38,9 +38,9 @@ namespace CloudMoeUI
 
         System.Windows.Media.Color DarkTitleBarColorOpacity = System.Windows.Media.Color.FromArgb(64, 0, 0, 0); // 标题栏颜色
         System.Windows.Media.Color DarkWin8ColorOpacity = System.Windows.Media.Color.FromArgb(240, 31, 31, 31); // Win8颜色（轻微透明）
-        System.Windows.Media.Color DarkBlurColorOpacity = System.Windows.Media.Color.FromArgb(128, 12, 12, 12); // 模糊颜色（透明） // double BlurOpacity = 0.6; // 模糊透明度
+        System.Windows.Media.Color DarkBlurColorOpacity = System.Windows.Media.Color.FromArgb(153, 16, 16, 16); // 模糊颜色（透明） // double BlurOpacity = 0.6; // 模糊透明度（微软标准Tint为60%）
         System.Windows.Media.Color DarkBlurColorNonOpacity = System.Windows.Media.Color.FromArgb(255, 31, 31, 31); // 模糊颜色（不透明）
-        double DarkNoiseEffectRatio = 0.05; // 材质强度
+        double DarkNoiseEffectRatio = 0.08; // 材质强度（微软标准为4%，因为黑白色分离，所以需要两倍）
 
         #endregion
 
@@ -48,9 +48,9 @@ namespace CloudMoeUI
 
         System.Windows.Media.Color LightTitleBarColorOpacity = System.Windows.Media.Color.FromArgb(64, 255, 255, 255); // 标题栏颜色
         System.Windows.Media.Color LightWin8ColorOpacity = System.Windows.Media.Color.FromArgb(240, 230, 230, 230); // Win8颜色（轻微透明）
-        System.Windows.Media.Color LightBlurColorOpacity = System.Windows.Media.Color.FromArgb(128, 255, 255, 255); // 模糊颜色（透明）
+        System.Windows.Media.Color LightBlurColorOpacity = System.Windows.Media.Color.FromArgb(153, 250, 250, 250); // 模糊颜色（透明）
         System.Windows.Media.Color LightBlurColorNonOpacity = System.Windows.Media.Color.FromArgb(255, 230, 230, 230); // 模糊颜色（不透明）
-        double LightNoiseEffectRatio = 0.05; // 材质强度
+        double LightNoiseEffectRatio = 0.08; // 材质强度（微软标准为4%，因为黑白色分离，所以需要两倍）
 
         #endregion
 
@@ -68,7 +68,7 @@ namespace CloudMoeUI
 
         #endregion
 
-        #region CloudMoeUI Core Code (Version 1904.15039)
+        #region CloudMoeUI Core Code (Version 1904.18053)
 
         #region 动画属性声明（请在非启动窗体移除此代码块）
 
@@ -625,9 +625,7 @@ namespace CloudMoeUI
         {
             try
             {
-                Accent expectedAccent;
-                AppTheme expectedTheme;
-
+                Theme expectedTheme;
                 if (GetWindows10AppsLightThemeSetting() == "1") // 是否使用亮色主题（Win10）
                 {
                     TitleBarColorOpacity = LightTitleBarColorOpacity; // 标题栏颜色
@@ -635,8 +633,8 @@ namespace CloudMoeUI
                     BlurColorOpacity = LightBlurColorOpacity; // 模糊颜色（透明）
                     BlurColorNonOpacity = LightBlurColorNonOpacity; // 模糊颜色（不透明）
                     NoiseEffectRatio = LightNoiseEffectRatio; // 材质强度
-                    expectedAccent = ThemeManager.Accents.First(x => x.Name == "Blue");
-                    expectedTheme = ThemeManager.GetAppTheme("BaseLight");
+                    NoiseEffectObject.IsLight = true; // 设置材质颜色
+                    expectedTheme = ThemeManager.GetTheme("Light.Blue");
                 }
                 else
                 {
@@ -645,12 +643,12 @@ namespace CloudMoeUI
                     BlurColorOpacity = DarkBlurColorOpacity; // 模糊颜色（透明）
                     BlurColorNonOpacity = DarkBlurColorNonOpacity; // 模糊颜色（不透明）
                     NoiseEffectRatio = DarkNoiseEffectRatio; // 材质强度
-                    expectedAccent = ThemeManager.Accents.First(x => x.Name == "Blue");
-                    expectedTheme = ThemeManager.GetAppTheme("BaseDark");
+                    NoiseEffectObject.IsLight = false; // 设置材质颜色
+                    expectedTheme = ThemeManager.GetTheme("Dark.Blue");
                 }
                 TitleBarColor.Background = new SolidColorBrush(TitleBarColorOpacity); // 设置标题栏颜色
 
-                ThemeManager.ChangeAppStyle(Application.Current, expectedAccent, expectedTheme);
+                ThemeManager.ChangeTheme(Application.Current, expectedTheme);
                 return true;
             }
             catch

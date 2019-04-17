@@ -17,19 +17,29 @@ namespace CloudMoeUI
         public static readonly DependencyProperty RatioProperty = DependencyProperty.Register("Ratio", typeof(double),
             typeof(NoiseEffect), new UIPropertyMetadata(0.5d, PixelShaderConstantCallback(0)));
 
+        public static readonly DependencyProperty IsLightProperty = DependencyProperty.Register("IsLight", typeof(bool),
+            typeof(NoiseEffect), new UIPropertyMetadata(true, PixelShaderConstantCallback(0)));
+
         public NoiseEffect()
         {
             var pixelShader = new PixelShader { UriSource = new Uri("/CloudMoeUI;component/Noise.ps", UriKind.Relative) };
             PixelShader = pixelShader;
             var bitmap = new BitmapImage();
             bitmap.BeginInit();
-            bitmap.UriSource = new Uri("pack://application:,,,/CloudMoeUI;component/Images/noise.png");
+            if (((bool)(GetValue(IsLightProperty))))
+            {
+                bitmap.UriSource = new Uri("pack://application:,,,/CloudMoeUI;component/Images/noise_light.png");
+            }
+            else
+            {
+                bitmap.UriSource = new Uri("pack://application:,,,/CloudMoeUI;component/Images/noise_dark.png");
+            }
             bitmap.EndInit();
             RandomInput =
                 new ImageBrush(bitmap)
                 {
                     TileMode = TileMode.Tile,
-                    Viewport = new Rect(0, 0, 100, 100), // 100px*100px
+                    Viewport = new Rect(0, 0, 300, 300), // 300px*300px
                     ViewportUnits = BrushMappingMode.Absolute
                 };
 
@@ -55,6 +65,12 @@ namespace CloudMoeUI
         {
             get => ((double)(GetValue(RatioProperty)));
             set => SetValue(RatioProperty, value);
+        }
+
+        public bool IsLight
+        {
+            get => ((bool)(GetValue(IsLightProperty)));
+            set => SetValue(IsLightProperty, value);
         }
     }
 }
