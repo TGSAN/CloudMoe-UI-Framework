@@ -40,7 +40,6 @@ namespace CloudMoeUI
         System.Windows.Media.Color DarkWin8ColorOpacity = System.Windows.Media.Color.FromArgb(240, 31, 31, 31); // Win8颜色（轻微透明）
         System.Windows.Media.Color DarkBlurColorOpacity = System.Windows.Media.Color.FromArgb(153, 16, 16, 16); // 模糊颜色（透明） // double BlurOpacity = 0.6; // 模糊透明度（微软标准Tint为60%）
         System.Windows.Media.Color DarkBlurColorNonOpacity = System.Windows.Media.Color.FromArgb(255, 31, 31, 31); // 模糊颜色（不透明）
-        double DarkNoiseEffectRatio = 0.08; // 材质强度（微软标准为4%，因为黑白色分离，所以需要两倍）
 
         #endregion
 
@@ -50,7 +49,6 @@ namespace CloudMoeUI
         System.Windows.Media.Color LightWin8ColorOpacity = System.Windows.Media.Color.FromArgb(240, 230, 230, 230); // Win8颜色（轻微透明）
         System.Windows.Media.Color LightBlurColorOpacity = System.Windows.Media.Color.FromArgb(153, 250, 250, 250); // 模糊颜色（透明）
         System.Windows.Media.Color LightBlurColorNonOpacity = System.Windows.Media.Color.FromArgb(255, 230, 230, 230); // 模糊颜色（不透明）
-        double LightNoiseEffectRatio = 0.08; // 材质强度（微软标准为4%，因为黑白色分离，所以需要两倍）
 
         #endregion
 
@@ -60,7 +58,7 @@ namespace CloudMoeUI
         System.Windows.Media.Color BlurColorNonOpacity; // 模糊颜色（不透明）
         System.Windows.Media.Color TransparentColor = System.Windows.Media.Color.FromArgb(0, 0, 0, 0); // 全透明
 
-        double NoiseEffectRatio; // 材质强度
+        double NoiseEffectRatio = 0.06; // 材质强度（微软建议值4%，但根据官方UWP效果来看并不准确）
 
         int BlurAnimationTime = 250; // 模糊切换动画事件（ms）
 
@@ -68,7 +66,7 @@ namespace CloudMoeUI
 
         #endregion
 
-        #region CloudMoeUI Core Code (Version 1904.18053)
+        #region CloudMoeUI Core Code (Version 1909.15001)
 
         #region 动画属性声明（请在非启动窗体移除此代码块）
 
@@ -355,22 +353,26 @@ namespace CloudMoeUI
                 // 模糊时选择性使用材质
                 if (Environment.OSVersion.Version.Major > 6) // 是否为Win10
                 {
+                    NoiseRectangle.Opacity = NoiseEffectRatio; // 设置材质强度
                     //NoiseEffectObject.Ratio = NoiseEffectRatio; // 设置材质强度
                     if (Environment.OSVersion.Version.Build >= 17134) // 只在1803及以上系统采用亚克力材质
                     {
                         if (GetWindows10TransparencySetting() == "1") // 如果Win10设置开启模糊则使用亚克力材质
                         {
-                            NoiseEffectObject.Ratio = NoiseEffectRatio; // 设置材质强度
+                            NoiseRectangle.Opacity = NoiseEffectRatio; // 设置材质强度
+                            //NoiseEffectObject.Ratio = NoiseEffectRatio; // 设置材质强度
                         }
                         else
                         {
-                            NoiseEffectObject.Ratio = 0; // 关闭材质
+                            NoiseRectangle.Opacity = 0; // 关闭材质
+                            //NoiseEffectObject.Ratio = 0; // 关闭材质
                         }
                     }
                     else
                     {
+                        NoiseRectangle.Opacity = NoiseEffectRatio; // 设置材质强度
                         //NoiseEffectObject.Ratio = 0; // 关闭材质
-                        NoiseEffectObject.Ratio = NoiseEffectRatio / 2; // 设置材质强度（更弱的）
+                        //NoiseEffectObject.Ratio = NoiseEffectRatio / 2; // 设置材质强度（更弱的）
                     }
                 }
                 LastBlurBool = true;
@@ -382,7 +384,8 @@ namespace CloudMoeUI
                 // 最大化时禁用模糊（因为超出工作区所以需要彻底禁用保持美观），普通模式下不禁用模糊（因为切换模糊时会变一下半透明）
                 if (WindowState == WindowState.Maximized)
                 {
-                    BlurRectangle.Fill = new SolidColorBrush(BlurColorNonOpacity); // 最大化直接不透明，不使用动画
+                    //BlurRectangle.Fill = new SolidColorBrush(BlurColorNonOpacity); // 最大化直接不透明，不使用动画，此处不能这样操作，因为系统主题颜色变换需要刷新
+                    BGOpacityAnimation(false, 0); // 最大化直接不透明，不使用动画
                     //Thread.Sleep(1000);
                     BlurEffect.GeneralBlurSwitcher(visual, false);
                 }
@@ -390,7 +393,8 @@ namespace CloudMoeUI
                 {
                     if (GetWindows10TransparencySetting() == "0") // 如果Win10设置关闭模糊则彻底关闭模糊
                     {
-                        BlurRectangle.Fill = new SolidColorBrush(BlurColorNonOpacity); // 禁用模糊直接不透明，不使用动画
+                        //BlurRectangle.Fill = new SolidColorBrush(BlurColorNonOpacity); // 禁用模糊直接不透明，不使用动画，此处不能这样操作，因为系统主题颜色变换需要刷新
+                        BGOpacityAnimation(false, 0); // 禁用模糊直接不透明，不使用动画
                         BlurEffect.GeneralBlurSwitcher(visual, false);
                     }
                     else
@@ -398,7 +402,7 @@ namespace CloudMoeUI
                         BGOpacityAnimation(false, animation_time); // 普通情况下使用动画
                     }
                 }
-                NoiseEffectObject.Ratio = 0; // 关闭模糊时关闭材质
+                //NoiseEffectObject.Ratio = 0; // 关闭模糊时关闭材质
                 LastBlurBool = false;
             }
         }
@@ -426,7 +430,7 @@ namespace CloudMoeUI
             if ((Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor > 1) || (Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor <= 1 && DwmIsCompositionEnabled() == false)) // 是否为Win8或者Win8.1（Win8:6.2,Win8.1:6.3），或者Vista或Win7未开启DWM
             {
                 OS_BlurColorOpacity = Win8ColorOpacity; // 设置透明度
-                NoiseEffectObject.Ratio = 0; // 关闭材质
+                //NoiseEffectObject.Ratio = 0; // 关闭材质
             }
 
             if (IsOpacity == true)
@@ -632,8 +636,7 @@ namespace CloudMoeUI
                     Win8ColorOpacity = LightWin8ColorOpacity; // Win8颜色（轻微透明）
                     BlurColorOpacity = LightBlurColorOpacity; // 模糊颜色（透明）
                     BlurColorNonOpacity = LightBlurColorNonOpacity; // 模糊颜色（不透明）
-                    NoiseEffectRatio = LightNoiseEffectRatio; // 材质强度
-                    NoiseEffectObject.IsLight = true; // 设置材质颜色
+                    //NoiseEffectObject.IsLight = true; // 设置材质颜色
                     expectedTheme = ThemeManager.GetTheme("Light.Blue");
                 }
                 else
@@ -642,8 +645,7 @@ namespace CloudMoeUI
                     Win8ColorOpacity = DarkWin8ColorOpacity; // Win8颜色（轻微透明）
                     BlurColorOpacity = DarkBlurColorOpacity; // 模糊颜色（透明）
                     BlurColorNonOpacity = DarkBlurColorNonOpacity; // 模糊颜色（不透明）
-                    NoiseEffectRatio = DarkNoiseEffectRatio; // 材质强度
-                    NoiseEffectObject.IsLight = false; // 设置材质颜色
+                    //NoiseEffectObject.IsLight = false; // 设置材质颜色
                     expectedTheme = ThemeManager.GetTheme("Dark.Blue");
                 }
                 TitleBarColor.Background = new SolidColorBrush(TitleBarColorOpacity); // 设置标题栏颜色
@@ -666,6 +668,7 @@ namespace CloudMoeUI
             {
                 AutoSyncThemeSetting(); // 应用Win10全局主题设置
                 AllowsTransparency = true; // 设置允许透明（必须在代码初始化后立即声明，否则有问题）
+                NoiseRectangle.Opacity = NoiseEffectRatio; // 设置材质强度
                 Background = new SolidColorBrush(BlurColorNonOpacity); // 启动时整体背景不透明
                 Loaded += MainWindow_Loaded;
                 SizeChanged += MainWindow_SizeChanged;
