@@ -16,7 +16,7 @@ Simply to building your WPF look like UWP apps. (even on Windows 7 or Vista)
 
 - [x] 亚克力模糊焦点移除时的过渡动效
 
-- [x] 效果自动降级（降级优先级为：亚克力模糊 > 旧 Windows 10 标准模糊 > Aero 模糊 > 半透明）
+- [x] 效果自动降级（降级优先级为：Mica 云母效果 > Acrylic 亚克力模糊 > 旧 Windows 10 标准模糊 > Aero 模糊 > 半透明）
 
 - [x] Windows 10 Style 在任意系统上（Vista~10）
 
@@ -42,6 +42,7 @@ Simply to building your WPF look like UWP apps. (even on Windows 7 or Vista)
 
 | 系统                      | 特效                           |
 | :------------------------ |:------------------------------|
+| Windows 11 21H1+          | 云母背景 (Mica Background)     |
 | Windows 10 1803~1809+     | 亚克力模糊 (Acrylic Blur)      |
 | Windows 10 1507~1709      | Windows 10 模糊 (Acrylic Blur) |
 | Windows 8~8.1             | 半透明 (Translucent)           |

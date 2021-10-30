@@ -67,7 +67,7 @@ namespace CloudMoeUI
 
                 DwmSetWindowAttribute(visualHelperIntPtr, dwmwaNcrenderingPolicy, ref dwmncrpDisabled, sizeof(int));
             }
-            catch (DllNotFoundException)
+            catch (Exception)
             {
                 Application.Current.MainWindow.Background = Brushes.White;
             }
@@ -98,7 +98,49 @@ namespace CloudMoeUI
 
                 DwmSetWindowAttribute(visualHelperIntPtr, dwmwaNcrenderingPolicy, ref dwmncrpDisabled, sizeof(int));
             }
-            catch (DllNotFoundException)
+            catch (Exception)
+            {
+                Application.Current.MainWindow.Background = Brushes.White;
+            }
+        }
+
+        #endregion
+
+        #region Windows11 Mica
+
+        public enum DWMWINDOWATTRIBUTE
+        {
+            DWMWA_USE_IMMERSIVE_DARK_MODE = 20,
+            DWMWA_MICA_EFFECT = 1029
+        };
+
+        public static void MicaSwitcher(Visual visual, bool enable)
+        {
+            try
+            {
+                var visualHelperIntPtr = ((HwndSource)PresentationSource.FromVisual(visual)).Handle;
+
+                var micaEnable = enable ? 1 : 0;
+
+                DwmSetWindowAttribute(visualHelperIntPtr, (int)DWMWINDOWATTRIBUTE.DWMWA_MICA_EFFECT, ref micaEnable, sizeof(int));
+            }
+            catch
+            {
+                Application.Current.MainWindow.Background = Brushes.White;
+            }
+        }
+
+        public static void DarkSwitcher(Visual visual, bool enable)
+        {
+            try
+            {
+                var visualHelperIntPtr = ((HwndSource)PresentationSource.FromVisual(visual)).Handle;
+
+                var darkEnable = enable ? 1 : 0;
+
+                DwmSetWindowAttribute(visualHelperIntPtr, (int)DWMWINDOWATTRIBUTE.DWMWA_USE_IMMERSIVE_DARK_MODE, ref darkEnable, sizeof(int));
+            }
+            catch
             {
                 Application.Current.MainWindow.Background = Brushes.White;
             }
@@ -284,6 +326,14 @@ namespace CloudMoeUI
 
         //General
 
+        public static void GeneralDarkSwitcher(Visual visual, bool is_enable)
+        {
+            if (Environment.OSVersion.Version.Major >= 10 && Environment.OSVersion.Version.Build >= 22000) // Win11及以上
+            {
+                DarkSwitcher(visual, is_enable);
+            }
+        }
+
         public static void GeneralBlurSwitcher(Visual visual, bool is_enable)
         {
             try
@@ -302,9 +352,9 @@ namespace CloudMoeUI
                         //GlassWindow.AeroGlassCompositionEnabled = false;
                     }
                 }
-                else
+                else if (Environment.OSVersion.Version.Build < 22000)
                 {
-                    //Win8及以上（PS：其实只有Win10能用(*ﾉωﾉ)）
+                    //Win8、8.1、10（PS：其实只有Win10能用(*ﾉωﾉ)）
                     if (is_enable == true)
                     {
                         Win10EnableBlur(visual);
@@ -313,6 +363,18 @@ namespace CloudMoeUI
                     else
                     {
                         Win10DisableBlur(visual);
+                    }
+                }
+                else
+                {
+                    //Win11及以上
+                    if (is_enable == true)
+                    {
+                        MicaSwitcher(visual, true);
+                    }
+                    else
+                    {
+                        MicaSwitcher(visual, false);
                     }
                 }
             }

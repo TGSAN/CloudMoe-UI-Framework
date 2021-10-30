@@ -61,6 +61,7 @@ namespace CloudMoeUI
         double NoiseEffectRatio = 0.06; // 材质强度（微软建议值4%，但根据官方UWP效果来看并不准确）
 
         int BlurAnimationTime = 250; // 模糊切换动画事件（ms）
+        int Win11BlurAnimationTime = 500; // Win11模糊切换动画事件（ms）
 
         int AnimationFrameRate = 120; // 动画目标帧率（FPS）
 
@@ -333,8 +334,16 @@ namespace CloudMoeUI
         {
             if (animation_time < 0) // 如果未指定时间，则使用默认值
             {
-                animation_time = BlurAnimationTime;
+                if (Environment.OSVersion.Version.Build >= 22000)
+                {
+                    animation_time = Win11BlurAnimationTime;
+                }
+                else
+                {
+                    animation_time = BlurAnimationTime;
+                }
             }
+            BlurEffect.GeneralDarkSwitcher(visual, GetWindows10AppsLightThemeSetting() == "1" ? false : true);
             if (switcher == true)
             {
                 //BlurEffectV2.SetIsEnabled(this, true);
@@ -351,11 +360,15 @@ namespace CloudMoeUI
                     BlurRectangle.Fill = new SolidColorBrush(BlurColorNonOpacity); // 禁用模糊直接不透明，不使用动画
                 }
                 // 模糊时选择性使用材质
-                if (Environment.OSVersion.Version.Major > 6) // 是否为Win10
+                if (Environment.OSVersion.Version.Major > 6) // 是否为Win7以上
                 {
                     NoiseRectangle.Opacity = NoiseEffectRatio; // 设置材质强度
                     //NoiseEffectObject.Ratio = NoiseEffectRatio; // 设置材质强度
-                    if (Environment.OSVersion.Version.Build >= 17134) // 只在1803及以上系统采用亚克力材质
+                    if (Environment.OSVersion.Version.Build >= 22000) // 只在Win11及以上系统采用Mica无需亚克力材质
+                    {
+                        NoiseRectangle.Opacity = 0; // 关闭材质
+                    }
+                    else if (Environment.OSVersion.Version.Build >= 17134) // 只在1803及以上Win10系统采用亚克力材质
                     {
                         if (GetWindows10TransparencySetting() == "1") // 如果Win10设置开启模糊则使用亚克力材质
                         {
@@ -399,7 +412,7 @@ namespace CloudMoeUI
                     }
                     else
                     {
-                        BGOpacityAnimation(false, animation_time); // 普通情况下使用动画
+                        BGOpacityAnimation(false, animation_time); // 普通情况下使用动画（Win11是系统接管的效果，所以不需要处理）
                     }
                 }
                 //NoiseEffectObject.Ratio = 0; // 关闭模糊时关闭材质
@@ -430,7 +443,11 @@ namespace CloudMoeUI
             if ((Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor > 1) || (Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor <= 1 && DwmIsCompositionEnabled() == false)) // 是否为Win8或者Win8.1（Win8:6.2,Win8.1:6.3），或者Vista或Win7未开启DWM
             {
                 OS_BlurColorOpacity = Win8ColorOpacity; // 设置透明度
-                //NoiseEffectObject.Ratio = 0; // 关闭材质
+            }
+
+            if (Environment.OSVersion.Version.Build >= 22000) // Win11 Mica 效果可以不要背景色
+            {
+                OS_BlurColorOpacity = TransparentColor;
             }
 
             if (IsOpacity == true)
@@ -638,6 +655,10 @@ namespace CloudMoeUI
                     BlurColorNonOpacity = LightBlurColorNonOpacity; // 模糊颜色（不透明）
                     //NoiseEffectObject.IsLight = true; // 设置材质颜色
                     expectedTheme = ThemeManager.GetTheme("Light.Blue");
+                    if ((HwndSource)PresentationSource.FromVisual(this) != null)
+                    {
+                        BlurEffect.GeneralDarkSwitcher(this, false);
+                    }
                 }
                 else
                 {
@@ -647,7 +668,13 @@ namespace CloudMoeUI
                     BlurColorNonOpacity = DarkBlurColorNonOpacity; // 模糊颜色（不透明）
                     //NoiseEffectObject.IsLight = false; // 设置材质颜色
                     expectedTheme = ThemeManager.GetTheme("Dark.Blue");
+                    if ((HwndSource)PresentationSource.FromVisual(this) != null)
+                    {
+                        BlurEffect.GeneralDarkSwitcher(this, true);
+                    }
                 }
+                TransparentColor = System.Windows.Media.Color.FromArgb(0, BlurColorNonOpacity.R, BlurColorNonOpacity.G, BlurColorNonOpacity.B);
+
                 TitleBarColor.Background = new SolidColorBrush(TitleBarColorOpacity); // 设置标题栏颜色
 
                 ThemeManager.ChangeTheme(Application.Current, expectedTheme);
